@@ -3,6 +3,7 @@ package com.personal.delivery_allocation_engine.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
@@ -20,7 +21,7 @@ public class AsyncConfig {
     executor.setCorePoolSize(5);
     executor.setMaxPoolSize(10);
     executor.setQueueCapacity(25);
-    executor.setThreadNamePrefix("partner-allocation-");
+    executor.setThreadNamePrefix("allocation-");
     executor.initialize();
     return executor;
   }

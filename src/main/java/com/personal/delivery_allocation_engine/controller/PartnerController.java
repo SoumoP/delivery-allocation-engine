@@ -1,8 +1,8 @@
 package com.personal.delivery_allocation_engine.controller;
 
 import com.personal.delivery_allocation_engine.dto.request.LocationUpdateRequest;
-import com.personal.delivery_allocation_engine.dtoPartnerLocationResponse;
-import com.personal.delivery_allocation_engine.service.PartnerService;
+import com.personal.delivery_allocation_engine.dto.response.PartnerLocationResponse;
+import com.personal.delivery_allocation_engine.service.PartnerDao;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,20 +22,20 @@ import java.util.List;
 @Tag(name = "Partners", description = "Delivery partner management APIs")
 public class PartnerController {
 
-  private final PartnerService partnerService;
+  private final PartnerDao partnerDao;
 
   @PostMapping("/{id}/location")
   @Operation(summary = "Update partner location", description = "Updates the real-time GPS coordinates of a delivery partner")
   public ResponseEntity<PartnerLocationResponse> updateLocation(
       @Parameter(description = "Partner ID") @PathVariable Long id, @Valid @RequestBody LocationUpdateRequest request) {
-    PartnerLocationResponse response = partnerService.updateLocation(id, request);
+    PartnerLocationResponse response = partnerDao.updateLocation(id, request);
     return ResponseEntity.ok(response);
   }
 
   @GetMapping
   @Operation(summary = "Get all partners", description = "Retrieves all delivery partners and their current locations")
   public ResponseEntity<List<PartnerLocationResponse>> getAllPartners() {
-    List<PartnerLocationResponse> partners = partnerService.getAllPartners();
+    List<PartnerLocationResponse> partners = partnerDao.getAllPartners();
     return ResponseEntity.ok(partners);
   }
 
@@ -43,7 +43,7 @@ public class PartnerController {
   @Operation(summary = "Get partner by ID", description = "Retrieves a specific delivery partner by ID")
   public ResponseEntity<PartnerLocationResponse> getPartner(
       @Parameter(description = "Partner ID") @PathVariable Long id) {
-    PartnerLocationResponse partner = partnerService.getPartner(id);
+    PartnerLocationResponse partner = partnerDao.getPartner(id);
     return ResponseEntity.ok(partner);
   }
 }

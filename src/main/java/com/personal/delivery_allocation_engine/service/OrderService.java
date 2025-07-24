@@ -6,7 +6,7 @@ import com.personal.delivery_allocation_engine.dto.request.OrderCreateRequest;
 import com.personal.delivery_allocation_engine.dto.response.OrderResponse;
 import com.personal.delivery_allocation_engine.entity.Order;
 import com.personal.delivery_allocation_engine.entity.Restaurant;
-import com.personal.delivery_allocation_engine.repository.OrderRepository;
+import com.personal.delivery_allocation_engine.dao.OrderDao;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,11 +21,10 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class OrderService {
-
-  private final OrderRepository orderRepository;
   private final PartnerAllocationService partnerAllocationService;
   private final UserService userService;
   private final RestaurantService restaurantService;
+  private final OrderDao orderDao;
 
   @Transactional
   public OrderResponse createOrder(OrderCreateRequest request) {
@@ -48,21 +47,21 @@ public class OrderService {
 
   private Order persistOrder(Restaurant restaurant, User user) {
     Order order = Order.builder().restaurant(restaurant).user(user).status(OrderStatus.PENDING).build();
-    return orderRepository.save(order);
+    return orderDao.save(order);
   }
 
   public List<OrderResponse> getAllOrders() {
-    return orderRepository.findAll().stream().map(this::mapToResponse).toList();
+    return orderDao.findAll().stream().map(this::mapToResponse).toList();
   }
 
   public OrderResponse getOrder(Long orderId) {
-    Order order = orderRepository.findById(orderId)
+    Order order = orderDao.findById(orderId)
         .orElseThrow(() -> new RuntimeException("Order not found with id: " + orderId));
     return mapToResponse(order);
   }
 
   public List<OrderResponse> getPartnerOrders(Long partnerId) {
-    List<Order> orders = orderRepository.findByAssignedPartnerIdAndStatus(partnerId, OrderStatus.ASSIGNED);
+    List<Order> orders = orderDao.findByAssignedPartnerIdAndStatus(partnerId, OrderStatus.ASSIGNED);
     return orders.stream().map(this::mapToResponse).toList();
   }
 
