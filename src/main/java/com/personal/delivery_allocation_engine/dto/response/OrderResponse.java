@@ -1,5 +1,6 @@
-package com.personal.delivery_allocation_engine.dto;
+package com.personal.delivery_allocation_engine.dto.response;
 
+import com.personal.delivery_allocation_engine.enums.OrderStatus;
 import lombok.Builder;
 import lombok.Data;
 import java.time.LocalDateTime;
@@ -8,10 +9,10 @@ import java.time.LocalDateTime;
 @Builder
 public class OrderResponse {
     private Long id;
-    private Long restaurantId;
+    private String restaurant;
     private String restaurantLocation;
     private String customerLocation;
-    private String status;
+    private OrderStatus status;
     private Long assignedPartnerId;
     private Integer estimatedCookTime;
     private Integer totalEstimatedTime;

@@ -1,4 +1,4 @@
-package com.personal.delivery_allocation_engine.dto;
+package com.personal.delivery_allocation_engine.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;

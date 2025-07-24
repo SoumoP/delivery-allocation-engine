@@ -1,4 +1,4 @@
-package com.personal.delivery_allocation_engine.dto;
+package com.personal.delivery_allocation_engine.dto.response;
 
 import lombok.Builder;
 import lombok.Data;

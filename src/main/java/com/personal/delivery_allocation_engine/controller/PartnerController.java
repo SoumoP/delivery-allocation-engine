@@ -1,6 +1,6 @@
 package com.personal.delivery_allocation_engine.controller;
 
-import com.personal.delivery_allocation_engine.dto.LocationUpdateRequest;
+import com.personal.delivery_allocation_engine.dto.request.LocationUpdateRequest;
 import com.personal.delivery_allocation_engine.dtoPartnerLocationResponse;
 import com.personal.delivery_allocation_engine.service.PartnerService;
 import io.swagger.v3.oas.annotations.Operation;

@@ -1,8 +1,7 @@
 package com.personal.delivery_allocation_engine.controller;
 
-import com.personal.delivery_allocation_engine.dto.OrderCreateRequest;
-import com.personal.delivery_allocation_engine.dto.OrderResponse;
-import com.personal.delivery_allocation_engine.model.Order;
+import com.personal.delivery_allocation_engine.dto.request.OrderCreateRequest;
+import com.personal.delivery_allocation_engine.dto.response.OrderResponse;
 import com.personal.delivery_allocation_engine.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -14,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import java.util.List;
+
 /**
  * @author Soumyajit Podder created on 23/07/25
  */
@@ -45,15 +45,6 @@ public class OrderController {
       @Parameter(description = "Order ID") @PathVariable Long id) {
     OrderResponse order = orderService.getOrder(id);
     return ResponseEntity.ok(order);
-  }
-
-  @PutMapping("/{id}/status")
-  @Operation(summary = "Update order status", description = "Updates the status of an existing order")
-  public ResponseEntity<OrderResponse> updateOrderStatus(
-      @Parameter(description = "Order ID") @PathVariable Long id,
-      @Parameter(description = "New order status") @RequestBody Order.OrderStatus status) {
-    OrderResponse response = orderService.updateOrderStatus(id, status);
-    return ResponseEntity.ok(response);
   }
 
   @GetMapping("/partner/{partnerId}")
