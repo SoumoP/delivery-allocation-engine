@@ -2,7 +2,7 @@ package com.personal.delivery_allocation_engine.controller;
 
 import com.personal.delivery_allocation_engine.dto.request.LocationUpdateRequest;
 import com.personal.delivery_allocation_engine.dto.response.PartnerLocationResponse;
-import com.personal.delivery_allocation_engine.service.PartnerDao;
+import com.personal.delivery_allocation_engine.dao.PartnerDao;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;

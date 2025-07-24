@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+
 import java.util.List;
 
 /**
@@ -32,17 +33,9 @@ public class OrderController {
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
   }
 
-  @GetMapping
-  @Operation(summary = "Get all orders", description = "Retrieves all orders in the system")
-  public ResponseEntity<List<OrderResponse>> getAllOrders() {
-    List<OrderResponse> orders = orderService.getAllOrders();
-    return ResponseEntity.ok(orders);
-  }
-
   @GetMapping("/{id}")
   @Operation(summary = "Get order by ID", description = "Retrieves a specific order by its ID")
-  public ResponseEntity<OrderResponse> getOrder(
-      @Parameter(description = "Order ID") @PathVariable Long id) {
+  public ResponseEntity<OrderResponse> getOrder(@Parameter(description = "Order ID") @PathVariable Long id) {
     OrderResponse order = orderService.getOrder(id);
     return ResponseEntity.ok(order);
   }
@@ -52,6 +45,14 @@ public class OrderController {
   public ResponseEntity<List<OrderResponse>> getPartnerOrders(
       @Parameter(description = "Partner ID") @PathVariable Long partnerId) {
     List<OrderResponse> orders = orderService.getPartnerOrders(partnerId);
+    return ResponseEntity.ok(orders);
+  }
+
+  @GetMapping("/user/{userId}")
+  @Operation(summary = "Get user's orders", description = "Retrieves all orders for a specific user")
+  public ResponseEntity<List<OrderResponse>> getUserOrders(
+      @Parameter(description = "User ID") @PathVariable Long userId) {
+    List<OrderResponse> orders = orderService.getUserOrders(userId);
     return ResponseEntity.ok(orders);
   }
 }

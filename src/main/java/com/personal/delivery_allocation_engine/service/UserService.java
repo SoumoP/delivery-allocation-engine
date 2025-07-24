@@ -16,8 +16,8 @@ public class UserService {
 
   private final UserRepository userRepository;
 
-  public User getUser(OrderCreateRequest request) {
-    return userRepository.findById(request.getRestaurantId())
-        .orElseThrow(() -> new UserNotFoundException("User not found with id: " + request.getRestaurantId()));
+  public User getUser(Long userId) {
+    return userRepository.findById(userId)
+        .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
   }
 }

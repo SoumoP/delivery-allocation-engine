@@ -15,8 +15,8 @@ import org.springframework.stereotype.Service;
 public class RestaurantService {
   private final RestaurantRepository restaurantRepository;
 
-  public Restaurant getRestaurant(OrderCreateRequest request) {
-    return restaurantRepository.findById(request.getRestaurantId()).orElseThrow(
-        () -> new RestaurantNotFoundException("Restaurant not found with id: " + request.getRestaurantId()));
+  public Restaurant getRestaurant(Long restaurantId) {
+    return restaurantRepository.findById(restaurantId)
+        .orElseThrow(() -> new RestaurantNotFoundException("Restaurant not found with id: " + restaurantId));
   }
 }

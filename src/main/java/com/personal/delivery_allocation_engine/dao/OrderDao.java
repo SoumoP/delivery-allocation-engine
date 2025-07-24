@@ -2,6 +2,7 @@ package com.personal.delivery_allocation_engine.dao;
 
 import com.personal.delivery_allocation_engine.entity.Order;
 import com.personal.delivery_allocation_engine.enums.OrderStatus;
+import com.personal.delivery_allocation_engine.exception.OrderNotFoundException;
 import com.personal.delivery_allocation_engine.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,15 +22,15 @@ public class OrderDao {
     return orderRepository.save(order);
   }
 
-  public List<Order> findAll() {
-    return orderRepository.findAll();
-  }
-
-  public Optional<Order> findById(Long orderId) {
-    return orderRepository.findById(orderId);
+  public Order findById(Long orderId) {
+    return orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
   }
 
   public List<Order> findByAssignedPartnerIdAndStatus(Long partnerId, OrderStatus orderStatus) {
     return orderRepository.findByAssignedPartnerIdAndStatus(partnerId, orderStatus);
+  }
+
+  public List<Order> findAllByUserId(Long userId) {
+    return orderRepository.findAllByUser_Id(userId);
   }
 }

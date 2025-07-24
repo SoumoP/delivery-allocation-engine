@@ -7,11 +7,14 @@ import com.personal.delivery_allocation_engine.dto.response.OrderResponse;
 import com.personal.delivery_allocation_engine.entity.Order;
 import com.personal.delivery_allocation_engine.entity.Restaurant;
 import com.personal.delivery_allocation_engine.dao.OrderDao;
+import com.personal.delivery_allocation_engine.exception.OrderNotFoundException;
+import com.personal.delivery_allocation_engine.utils.OrderUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -31,10 +34,10 @@ public class OrderService {
     log.info("Creating new order for restaurant {}", request.getRestaurantId());
 
     // Validate restaurant exists
-    Restaurant restaurant = restaurantService.getRestaurant(request);
+    Restaurant restaurant = restaurantService.getRestaurant(request.getRestaurantId());
 
     // Validate user exists
-    User user = userService.getUser(request);
+    User user = userService.getUser(request.getUserId());
 
     // Create Order
     Order order = persistOrder(restaurant, user);
@@ -42,7 +45,7 @@ public class OrderService {
     // Trigger async partner allocation
     partnerAllocationService.allocateDeliveryPartnerAsync(order);
 
-    return mapToResponse(order);
+    return OrderUtils.mapToResponse(order);
   }
 
   private Order persistOrder(Restaurant restaurant, User user) {
@@ -50,26 +53,20 @@ public class OrderService {
     return orderDao.save(order);
   }
 
-  public List<OrderResponse> getAllOrders() {
-    return orderDao.findAll().stream().map(this::mapToResponse).toList();
-  }
-
   public OrderResponse getOrder(Long orderId) {
-    Order order = orderDao.findById(orderId)
-        .orElseThrow(() -> new RuntimeException("Order not found with id: " + orderId));
-    return mapToResponse(order);
+    Order order = orderDao.findById(orderId);
+    return OrderUtils.mapToResponse(order);
   }
 
   public List<OrderResponse> getPartnerOrders(Long partnerId) {
     List<Order> orders = orderDao.findByAssignedPartnerIdAndStatus(partnerId, OrderStatus.ASSIGNED);
-    return orders.stream().map(this::mapToResponse).toList();
+    return orders.stream().map(OrderUtils::mapToResponse)
+        .sorted(Comparator.comparing(OrderResponse::getTimestamp).reversed()).toList();
   }
 
-  private OrderResponse mapToResponse(Order order) {
-    return OrderResponse.builder().id(order.getId()).restaurant(order.getRestaurant().getName())
-        .restaurantLocation(order.getRestaurant().getLat() + "," + order.getRestaurant().getLng())
-        .customerLocation(order.getUser().getLat() + "," + order.getUser().getLng()).status(order.getStatus())
-        .assignedPartnerId(null).estimatedCookTime(null).totalEstimatedTime(null).timestamp(order.getCreatedAt())
-        .build();
+  public List<OrderResponse> getUserOrders(Long userId) {
+    List<Order> orders = orderDao.findAllByUserId(userId);
+    return orders.stream().map(OrderUtils::mapToResponse)
+        .sorted(Comparator.comparing(OrderResponse::getTimestamp).reversed()).toList();
   }
 }

@@ -8,7 +8,5 @@ public class OrderCreateRequest {
     @NotNull
     private Long restaurantId;
     @NotNull
-    private String restaurantLocation;
-    @NotNull
-    private String customerLocation;
+    private Long userId;
 } 

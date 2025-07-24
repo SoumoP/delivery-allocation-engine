@@ -1,6 +1,7 @@
 package com.personal.delivery_allocation_engine.service;
 
 import com.personal.delivery_allocation_engine.dao.OrderDao;
+import com.personal.delivery_allocation_engine.dao.PartnerDao;
 import com.personal.delivery_allocation_engine.entity.Partner;
 import com.personal.delivery_allocation_engine.entity.Order;
 import com.personal.delivery_allocation_engine.enums.OrderStatus;
@@ -80,7 +81,7 @@ public class PartnerAllocationService {
     log.error("Failed to allocate delivery partner for order {} after all retry attempts", orderId);
 
     // Update order status to failed or move to manual assignment queue
-    Order order = orderDao.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
+    Order order = orderDao.findById(orderId);
 
     order.setStatus(OrderStatus.ALLOCATION_FAILED);
     orderDao.save(order);

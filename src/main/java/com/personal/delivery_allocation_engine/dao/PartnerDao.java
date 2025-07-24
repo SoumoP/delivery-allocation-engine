@@ -1,4 +1,4 @@
-package com.personal.delivery_allocation_engine.service;
+package com.personal.delivery_allocation_engine.dao;
 
 import com.personal.delivery_allocation_engine.dto.request.LocationUpdateRequest;
 import com.personal.delivery_allocation_engine.dto.response.PartnerLocationResponse;
