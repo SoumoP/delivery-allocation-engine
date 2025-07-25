@@ -4,6 +4,7 @@ import com.personal.delivery_allocation_engine.dto.request.LocationUpdateRequest
 import com.personal.delivery_allocation_engine.dto.response.PartnerLocationResponse;
 import com.personal.delivery_allocation_engine.entity.Partner;
 import com.personal.delivery_allocation_engine.enums.PartnerStatus;
+import com.personal.delivery_allocation_engine.exception.PartnerNotFoundException;
 import com.personal.delivery_allocation_engine.repository.PartnerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,22 +23,12 @@ public class PartnerDao {
     partnerRepository.save(partner);
   }
 
-  public boolean isPartnerAvailable(Partner partner) {
-    return Objects.nonNull(partner) && partner.getStatus() == PartnerStatus.AVAILABLE;
+  public Partner getPartner(Long id) {
+    return partnerRepository.findById(id).orElseThrow(() -> new PartnerNotFoundException(id));
   }
 
-  public PartnerLocationResponse updateLocation(Long id, LocationUpdateRequest request) {
-    // TODO: Implement location update logic
-    return PartnerLocationResponse.builder().id(id).currentLocation("0,0").status("AVAILABLE").build();
+  public List<Partner> findAllById(List<Long> partnerIds) {
+    return partnerRepository.findAllByIdIn(partnerIds);
   }
 
-  public List<PartnerLocationResponse> getAllPartners() {
-    // TODO: Implement retrieval of all partners
-    return Collections.emptyList();
-  }
-
-  public PartnerLocationResponse getPartner(Long id) {
-    // TODO: Implement retrieval of a partner by id
-    return PartnerLocationResponse.builder().id(id).currentLocation("0,0").status("AVAILABLE").build();
-  }
 }
