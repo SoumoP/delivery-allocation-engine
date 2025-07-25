@@ -4,6 +4,7 @@ import com.personal.delivery_allocation_engine.dto.request.LocationUpdateRequest
 import com.personal.delivery_allocation_engine.dto.response.PartnerLocationResponse;
 import com.personal.delivery_allocation_engine.dao.PartnerDao;
 import com.personal.delivery_allocation_engine.entity.Partner;
+import com.personal.delivery_allocation_engine.exception.PartnerNotFoundException;
 import com.personal.delivery_allocation_engine.service.PartnerLocationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -20,7 +21,7 @@ import java.util.List;
  * @author Soumyajit Podder created on 23/07/25
  */
 @RestController
-@RequestMapping("/api/partners")
+@RequestMapping("/partners")
 @RequiredArgsConstructor
 @Tag(name = "Partners", description = "Delivery partner management APIs")
 public class PartnerController {
@@ -39,7 +40,11 @@ public class PartnerController {
   @GetMapping("/{id}")
   @Operation(summary = "Get partner by ID", description = "Retrieves a specific delivery partner by ID")
   public ResponseEntity<Partner> getPartner(@Parameter(description = "Partner ID") @PathVariable Long id) {
-    Partner partner = partnerDao.getPartner(id);
-    return ResponseEntity.ok(partner);
+    try {
+      Partner partner = partnerDao.getPartner(id);
+      return ResponseEntity.ok(partner);
+    } catch (PartnerNotFoundException e) {
+      return ResponseEntity.status(200).build();
+    }
   }
 }

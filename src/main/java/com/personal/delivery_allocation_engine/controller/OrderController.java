@@ -19,7 +19,7 @@ import java.util.List;
  * @author Soumyajit Podder created on 23/07/25
  */
 @RestController
-@RequestMapping("/api/orders")
+@RequestMapping("/orders")
 @RequiredArgsConstructor
 @Tag(name = "Orders", description = "Order management APIs")
 public class OrderController {

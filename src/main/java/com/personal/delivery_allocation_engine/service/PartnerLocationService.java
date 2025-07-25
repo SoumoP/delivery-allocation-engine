@@ -1,6 +1,5 @@
 package com.personal.delivery_allocation_engine.service;
 
-import com.personal.delivery_allocation_engine.config.Tile38Config;
 import com.personal.delivery_allocation_engine.dao.PartnerDao;
 import com.personal.delivery_allocation_engine.dto.partner.PartnerLocationInfo;
 import com.personal.delivery_allocation_engine.dto.request.LocationUpdateRequest;
@@ -30,14 +29,12 @@ public class PartnerLocationService {
 
   public static final String PARTNER_KEY = "partner:";
   private final RedisTemplate<String, Object> tile38Template;
-  private final Tile38Config tile38Config;
   private static final String PARTNERS_COLLECTION = "delivery_partners";
   private final PartnerDao partnerDao;
 
   public PartnerLocationService(@Qualifier("tile38RedisTemplate") RedisTemplate<String, Object> tile38Template,
-      Tile38Config tile38Config, PartnerDao partnerDao) {
+      PartnerDao partnerDao) {
     this.tile38Template = tile38Template;
-    this.tile38Config = tile38Config;
     this.partnerDao = partnerDao;
   }
 
@@ -62,7 +59,8 @@ public class PartnerLocationService {
         .currentLocation(String.format("%f,%f", lng, lat)).status(partner.getStatus().name()).build();
   }
 
-  public List<PartnerLocationInfo> findPartnersNearRestaurant(double lat, double lng, double radiusKm) {
+  public List<PartnerLocationInfo> findPartnersNearRestaurant(double lat, double lng, double radiusKm,
+      boolean onlyAvailable) {
     try {
       List<Object> result = tile38Template.execute((RedisCallback<List<Object>>) connection -> {
         Object rawResult = connection.execute("NEARBY", PARTNERS_COLLECTION.getBytes(), "POINT".getBytes(),
@@ -72,7 +70,8 @@ public class PartnerLocationService {
       });
 
       List<PartnerLocationInfo> parsed = parseNearbyResult(result);
-      return parsed.stream().filter(p -> p.getStatus() == PartnerStatus.AVAILABLE).collect(Collectors.toList());
+      return parsed.stream().filter(p -> !onlyAvailable || p.getStatus() == PartnerStatus.AVAILABLE)
+          .collect(Collectors.toList());
 
     } catch (Exception e) {
       log.error("Failed to find partners near location [{}, {}]: {}", lat, lng, e.getMessage(), e);

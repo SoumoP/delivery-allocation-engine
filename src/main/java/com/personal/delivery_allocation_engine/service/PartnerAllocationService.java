@@ -12,7 +12,6 @@ import com.personal.delivery_allocation_engine.enums.OrderStatus;
 import com.personal.delivery_allocation_engine.enums.PartnerStatus;
 import com.personal.delivery_allocation_engine.exception.OrderNotFoundException;
 import com.personal.delivery_allocation_engine.exception.PartnerNotFoundException;
-import com.personal.delivery_allocation_engine.utils.HaversineUtils;
 import com.personal.delivery_allocation_engine.utils.PartnerUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -70,14 +69,14 @@ public class PartnerAllocationService {
 
     if (maybePartner.isEmpty()) {
       log.warn("No available partners found for order {} - attempt will be retried", orderId);
-      throw new PartnerNotFoundException("No available delivery partners found.");
+      throw new PartnerNotFoundException();
     }
 
     Partner partner = maybePartner.get();
 
     if (!PartnerUtils.isPartnerAvailable(partner)) {
       log.warn("Partner {} became unavailable during allocation for order {}", partner.getId(), orderId);
-      throw new PartnerNotFoundException("Selected partner became unavailable");
+      throw new PartnerNotFoundException();
     }
 
     assignPartnerToOrder(order, partner);
@@ -119,7 +118,7 @@ public class PartnerAllocationService {
 
       // Find nearby partners
       List<PartnerLocationInfo> nearbyPartners = partnerLocationService.findPartnersNearRestaurant(restaurant.getLat(),
-          restaurant.getLng(), searchRadiusKm);
+          restaurant.getLng(), searchRadiusKm, onlyAvailable);
 
       if (nearbyPartners.isEmpty()) {
         log.warn("No partners found within {} km of restaurant {}", searchRadiusKm, restaurant.getId());
@@ -164,12 +163,11 @@ public class PartnerAllocationService {
       if (partner != null && (!onlyAvailable || PartnerUtils.isPartnerAvailable(partner))) {
         // Calculate total delivery time and distance
         double restaurantToPartnerDistance = locationInfo.getDistanceKm();
-        double partnerToUserDistance = HaversineUtils.getDistanceInMetres(locationInfo.getLatitude(),
-            locationInfo.getLongitude(), user.getLat(), user.getLng());
+        //        double partnerToUserDistance = HaversineUtils.getDistanceInMetres(locationInfo.getLatitude(),
+        //            locationInfo.getLongitude(), user.getLat(), user.getLng());
 
         PartnerCandidate candidate = PartnerCandidate.builder().partner(partner).locationInfo(locationInfo)
-            .restaurantDistance(restaurantToPartnerDistance).deliveryDistance(partnerToUserDistance)
-            .totalDistance(restaurantToPartnerDistance + partnerToUserDistance).build();
+            .partnerToRestaurantDistance(restaurantToPartnerDistance).build();
 
         candidates.add(candidate);
       }
@@ -193,7 +191,7 @@ public class PartnerAllocationService {
 
   private double calculatePartnerScore(PartnerCandidate candidate, int searchRadiusKm) {
     // Scoring factors with weights
-    double distanceScore = calculateDistanceScore(candidate.getTotalDistance(), searchRadiusKm);
+    double distanceScore = calculateDistanceScore(candidate.getPartnerToRestaurantDistance(), searchRadiusKm);
     double performanceScore = candidate.getPartner().getPerformanceScore();
     double availabilityScore = calculateAvailabilityScore(candidate.getPartner());
 

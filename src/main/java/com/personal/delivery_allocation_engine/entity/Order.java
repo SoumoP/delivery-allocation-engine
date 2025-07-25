@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Data
@@ -25,6 +26,9 @@ public class Order {
   @ManyToOne
   @JoinColumn(name = "restaurant_id")
   private Restaurant restaurant;
+  @OneToMany
+  @JoinColumn(name = "item_id")
+  private List<Item> items;
   @CreationTimestamp
   private LocalDateTime createdAt;
   @Enumerated(EnumType.STRING)
