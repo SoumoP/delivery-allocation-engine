@@ -1,7 +1,11 @@
 package com.personal.delivery_allocation_engine.service;
 
 import com.personal.delivery_allocation_engine.config.Tile38Config;
+import com.personal.delivery_allocation_engine.dao.PartnerDao;
 import com.personal.delivery_allocation_engine.dto.partner.PartnerLocationInfo;
+import com.personal.delivery_allocation_engine.dto.request.LocationUpdateRequest;
+import com.personal.delivery_allocation_engine.dto.response.PartnerLocationResponse;
+import com.personal.delivery_allocation_engine.entity.Partner;
 import com.personal.delivery_allocation_engine.enums.PartnerStatus;
 import com.personal.delivery_allocation_engine.utils.PartnerUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -24,36 +28,38 @@ import java.util.stream.Collectors;
 @Service
 public class PartnerLocationService {
 
+  public static final String PARTNER_KEY = "partner:";
   private final RedisTemplate<String, Object> tile38Template;
   private final Tile38Config tile38Config;
   private static final String PARTNERS_COLLECTION = "delivery_partners";
+  private final PartnerDao partnerDao;
 
   public PartnerLocationService(@Qualifier("tile38RedisTemplate") RedisTemplate<String, Object> tile38Template,
-      Tile38Config tile38Config) {
+      Tile38Config tile38Config, PartnerDao partnerDao) {
     this.tile38Template = tile38Template;
     this.tile38Config = tile38Config;
+    this.partnerDao = partnerDao;
   }
 
-  public void updatePartnerLocation(Long partnerId, double lat, double lng, PartnerStatus status) {
-    try {
-      String key = "partner:" + partnerId;
+  public PartnerLocationResponse updatePartnerLocation(Long partnerId, LocationUpdateRequest request) {
+    String key = PARTNER_KEY + partnerId;
+    Double lat = request.getLatitude();
+    Double lng = request.getLongitude();
 
-      if (status == PartnerStatus.AVAILABLE || status == PartnerStatus.BUSY) {
-        tile38Template.execute((RedisCallback<Object>) connection -> {
-          connection.execute("SET", PARTNERS_COLLECTION.getBytes(), key.getBytes(), "POINT".getBytes(),
-              String.valueOf(lat).getBytes(), String.valueOf(lng).getBytes());
-          return null;
-        });
+    // Fetch partner status (if not already available in context)
+    Partner partner = partnerDao.getPartner(partnerId);
 
-        setPartnerMetadata(key, status);
-        log.debug("Updated location for partner {} at [{}, {}]", partnerId, lat, lng);
-      } else {
-        removePartnerLocation(partnerId);
-      }
-    } catch (Exception e) {
-      log.error("Failed to update location for partner {}: {}", partnerId, e.getMessage(), e);
-      throw new RuntimeException("Failed to update partner location", e);
-    }
+    tile38Template.execute((RedisCallback<Object>) connection -> {
+      connection.execute("SET", PARTNERS_COLLECTION.getBytes(), key.getBytes(), "POINT".getBytes(),
+          String.valueOf(lat).getBytes(), String.valueOf(lng).getBytes(), "FIELD".getBytes(), "status".getBytes(),
+          partner.getStatus().name().getBytes(), "FIELD".getBytes(), "updated_at".getBytes(),
+          String.valueOf(System.currentTimeMillis()).getBytes());
+      return null;
+    });
+
+    log.info("Updated location and metadata for partner {} at [{}, {}]", partnerId, lat, lng);
+    return PartnerLocationResponse.builder().id(partnerId).name(partner.getName())
+        .currentLocation(String.format("%f,%f", lng, lat)).status(partner.getStatus().name()).build();
   }
 
   public List<PartnerLocationInfo> findPartnersNearRestaurant(double lat, double lng, double radiusKm) {
@@ -77,7 +83,7 @@ public class PartnerLocationService {
   // Fixed getPartnerLocation method
   public Optional<PartnerLocationInfo> getPartnerLocation(Long partnerId) {
     try {
-      String key = "partner:" + partnerId;
+      String key = PARTNER_KEY + partnerId;
 
       Object result = tile38Template.execute((RedisCallback<Object>) connection -> {
         return connection.execute("GET", PARTNERS_COLLECTION.getBytes(), key.getBytes(), "WITHFIELDS".getBytes());
@@ -151,7 +157,7 @@ public class PartnerLocationService {
 
   public void removePartnerLocation(Long partnerId) {
     try {
-      String key = "partner:" + partnerId;
+      String key = PARTNER_KEY + partnerId;
 
       tile38Template.execute((RedisCallback<Object>) connection -> {
         connection.execute("DEL", PARTNERS_COLLECTION.getBytes(), key.getBytes());
