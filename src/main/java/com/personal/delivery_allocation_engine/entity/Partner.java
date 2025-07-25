@@ -15,4 +15,5 @@ public class Partner {
   private String name;
   private String mobile;
   private PartnerStatus status;
+  private double performanceScore;
 } 

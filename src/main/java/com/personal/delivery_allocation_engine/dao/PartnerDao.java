@@ -22,8 +22,8 @@ public class PartnerDao {
     partnerRepository.save(partner);
   }
 
-  public boolean isPartnerAvailable(Partner partner) {
-    return Objects.nonNull(partner) && partner.getStatus() == PartnerStatus.AVAILABLE;
+  public List<Partner> findAllById(List<Long> partnerIds) {
+    return partnerRepository.findAllByIdIn(partnerIds);
   }
 
   public PartnerLocationResponse updateLocation(Long id, LocationUpdateRequest request) {
