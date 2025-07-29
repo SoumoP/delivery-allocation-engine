@@ -27,7 +27,7 @@ public class OrderDao {
   }
 
   public List<Order> findByAssignedPartnerIdAndStatus(Long partnerId, OrderStatus orderStatus) {
-    return orderRepository.findByAssignedPartnerIdAndStatus(partnerId, orderStatus);
+    return orderRepository.findByPartner_IdAndStatus(partnerId, orderStatus);
   }
 
   public List<Order> findAllByUserId(Long userId) {
